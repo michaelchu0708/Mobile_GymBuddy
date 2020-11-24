@@ -1,23 +1,36 @@
-import 'react-native-gesture-handler';
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-
+import "react-native-gesture-handler";
+import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 // Import Navigators from React Navigation
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
 // Import Screens
-import SplashScreen from './Screen/SplashScreen';
-import LoginScreen from './Screen/LoginScreen';
-import RegisterScreen from './Screen/RegisterScreen';
-import DrawerNavigationRoutes from './Screen/DrawerNavigationRoutes';
-
-
+import SplashScreen from "./Screen/SplashScreen";
+import LoginScreen from "./Screen/LoginScreen";
+import RegisterScreen from "./Screen/RegisterScreen";
+import DrawerNavigationRoutes from "./Screen/DrawerNavigationRoutes";
+import { Provider } from "react-redux";
+import { createStore } from "redux";
+import rootReducer from "./reducers";
+import Reactotron from './ReactotronConfig'
 
 const Stack = createStackNavigator();
-
+const initialState = {
+  workout: [
+    {
+      id: 0,
+      time: 0,
+      score: 0,
+    },
+  ],
+};
+const store = createStore(rootReducer, initialState, Reactotron.createEnhancer());
+if (__DEV__) {
+  import("./ReactotronConfig").then(() => console.log("Reactotron Configured"));
+}
 const Auth = () => {
   // Stack Navigator for Login and Sign up Screen
   return (
@@ -25,19 +38,19 @@ const Auth = () => {
       <Stack.Screen
         name=" "
         component={LoginScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="RegisterScreen"
         component={RegisterScreen}
         options={{
-          title: 'Register', //Set Header Title
+          title: "Register", //Set Header Title
           headerStyle: {
-            backgroundColor: '#000000', //Set Header color
+            backgroundColor: "#000000", //Set Header color
           },
-          headerTintColor: '#fff', //Set Header text color
+          headerTintColor: "#fff", //Set Header text color
           headerTitleStyle: {
-            fontWeight: 'bold', //Set Header text style
+            fontWeight: "bold", //Set Header text style
           },
         }}
       />
@@ -49,30 +62,32 @@ const Auth = () => {
   and we don't want to switch back once we switch from them to the next one */
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="SplashScreen">
-        {/* SplashScreen which will come once for 5 Seconds */}
-        <Stack.Screen
-          name="SplashScreen"
-          component={SplashScreen}
-          // Hiding header for Splash Screen
-          options={{headerShown: false}}
-        />
-        {/* Auth Navigator which includer Login Signup will come once */}
-        <Stack.Screen
-          name="Auth"
-          component={Auth}
-          options={{headerShown: false}}
-        />
-        {/* Navigation Drawer as a landing page */}
-        <Stack.Screen
-          name="DrawerNavigationRoutes"
-          component={DrawerNavigationRoutes}
-          // Hiding header for Navigation Drawer as we will use our custom header
-          options={{headerShown: false}}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="SplashScreen">
+          {/* SplashScreen which will come once for 5 Seconds */}
+          <Stack.Screen
+            name="SplashScreen"
+            component={SplashScreen}
+            // Hiding header for Splash Screen
+            options={{ headerShown: false }}
+          />
+          {/* Auth Navigator which includer Login Signup will come once */}
+          <Stack.Screen
+            name="Auth"
+            component={Auth}
+            options={{ headerShown: false }}
+          />
+          {/* Navigation Drawer as a landing page */}
+          <Stack.Screen
+            name="DrawerNavigationRoutes"
+            component={DrawerNavigationRoutes}
+            // Hiding header for Navigation Drawer as we will use our custom header
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 };
 

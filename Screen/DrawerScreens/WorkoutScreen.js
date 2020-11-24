@@ -33,6 +33,11 @@ import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
 import Svg, { Polyline } from "react-native-svg";
 import { Stopwatch, Timer } from "react-native-stopwatch-timer";
 import Dialog from "react-native-dialog";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+
+import { useSelector, useDispatch } from "react-redux";
+import { updateWorkout } from "../../actions";
 
 //disable yellow warnings on EXPO client!
 console.disableYellowBox = true;
@@ -60,8 +65,9 @@ const options = {
 
 let test_score_1 = 0;
 let test_score = 0;
+let time_1 = 0;
 
-const WorkoutScreen = () => {
+const WorkoutScreen = ({ navigation }) => {
   const [word, setWord] = useState("");
   const [result, setResult] = useState("");
   const [timerStart, settimerStart] = useState(false);
@@ -81,7 +87,9 @@ const WorkoutScreen = () => {
   const [ended, setEnded] = useState(false);
   const [final_score, setfinal_score] = useState(0);
   const [visible, setVisible] = useState(false);
-
+  const workout = useSelector((state) => state.workout);
+  const dispatch = useDispatch();
+  console.log(`Start: Workoutget: ${JSON.stringify(workout)}`);
   /*
   //if adding more languages, map codes from this list:
   // https://cloud.google.com/translate/docs/languages
@@ -296,7 +304,13 @@ const WorkoutScreen = () => {
 
   const getFormattedTime = (time) => {
     //currentTime = time;
-    if (!stopwatchStart) settime_(time);
+    if (!stopwatchStart) {
+      settime_(time);
+      workout[0].time = time.slice(6);
+      workout[0].score = test_score_1;
+      console.log(`${workout[0].time}, ${workout[0].score}`);
+      console.log(`${time}, ${test_score_1}`);
+    }
     //settime_(time);
   };
 
@@ -312,8 +326,13 @@ const WorkoutScreen = () => {
   const handleDelete = () => {
     // The user has pressed the "Delete" button, so here you can do your own logic.
     // ...Your logic
+
     resetStopwatch();
     setVisible(false);
+
+    console.log(JSON.stringify(workout));
+    dispatch(updateWorkout(workout));
+    navigation.navigate("HomeScreen");
   };
 
   const renderCameraView = () => {
@@ -331,11 +350,6 @@ const WorkoutScreen = () => {
           onReady={(imageAsTensors) => handleCameraStream(imageAsTensors)}
           autorender={true}
         />
-
-        <Text style={styles.legendTextField}>
-          Point to yourself to have a better analysis.{"\n\n"}Lets start your
-          workout!
-        </Text>
       </View>
     );
   };
@@ -377,14 +391,18 @@ const WorkoutScreen = () => {
           {
             position: "absolute",
             margin: 5,
-            top: 600,
-            right: 95,
+            top: 500,
+            right: 70,
             alignItems: "center",
             justifyContent: "center",
             zIndex: 5000,
           },
         ]}
       >
+        <Text style={styles.legendTextField}>
+          Point to yourself to have a better analysis.{"\n\n"}Lets start your
+          workout!
+        </Text>
         <Stopwatch
           laps
           msecs
@@ -406,7 +424,7 @@ const WorkoutScreen = () => {
         >
           <Text
             style={{
-              fontSize: 30,
+              fontSize: 15,
               color: "red",
               backgroundColor: "#111111",
               fontWeight: "700",
