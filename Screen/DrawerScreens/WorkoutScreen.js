@@ -34,10 +34,16 @@ import Svg, { Polyline } from "react-native-svg";
 import { Stopwatch, Timer } from "react-native-stopwatch-timer";
 import Dialog from "react-native-dialog";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
 
 import { useSelector, useDispatch } from "react-redux";
-import { updateWorkout } from "../../actions";
+//import { updateWorkout } from "../../actions";
+import * as types from "../../src/store/actionTypes";
+
+
+import {useRoute} from '@react-navigation/native';
+
+
+
 
 //disable yellow warnings on EXPO client!
 console.disableYellowBox = true;
@@ -68,6 +74,8 @@ let test_score = 0;
 let time_1 = 0;
 
 const WorkoutScreen = ({ navigation }) => {
+  const route = useRoute();
+  console.log(route.name);
   const [word, setWord] = useState("");
   const [result, setResult] = useState("");
   const [timerStart, settimerStart] = useState(false);
@@ -87,9 +95,12 @@ const WorkoutScreen = ({ navigation }) => {
   const [ended, setEnded] = useState(false);
   const [final_score, setfinal_score] = useState(0);
   const [visible, setVisible] = useState(false);
-  const workout = useSelector((state) => state.workout);
+  var utc = new Date().toJSON().slice(0, 10).replace(/-/g, "-");
+  const workout = useSelector((state) => state.calendar.markedDates);
+ // console.log(`${JSON.stringify(workout[utc].workouts.Squat.repCount)}`);
   const dispatch = useDispatch();
-  console.log(`Start: Workoutget: ${JSON.stringify(workout)}`);
+  var rep = workout[utc].workouts.Squat.repCount?workout[utc].workouts.Squat.repCount:0;
+  //console.log(`Start: Workoutget: ${JSON.stringify(workout)}`);
   /*
   //if adding more languages, map codes from this list:
   // https://cloud.google.com/translate/docs/languages
@@ -306,10 +317,11 @@ const WorkoutScreen = ({ navigation }) => {
     //currentTime = time;
     if (!stopwatchStart) {
       settime_(time);
-      workout[0].time = time.slice(6);
-      workout[0].score = test_score_1;
-      console.log(`${workout[0].time}, ${workout[0].score}`);
-      console.log(`${time}, ${test_score_1}`);
+      //workout[0].time = time.slice(6);
+      //workout[0].score = test_score_1;
+      //console.log(`${workout[0].time}, ${workout[0].score}`);
+      //console.log(`${time}, ${test_score_1}`);
+      //workout[utc].workouts.Squat.score = test_score_1;
     }
     //settime_(time);
   };
@@ -330,9 +342,18 @@ const WorkoutScreen = ({ navigation }) => {
     resetStopwatch();
     setVisible(false);
 
-    console.log(JSON.stringify(workout));
-    dispatch(updateWorkout(workout));
-    navigation.navigate("HomeScreen");
+    console.log(JSON.stringify(test_score_1));
+    //dispatch(updateWorkout(workout));
+
+    dispatch({
+      type: types.UPDATE_EXERCISE_SCORE,
+      payload: {
+        formattedDate: utc,
+        repCount:rep,
+        score: (test_score_1*100) .toFixed(2),
+      },
+    });
+    navigation.navigate("HomeStackScreen");
   };
 
   const renderCameraView = () => {

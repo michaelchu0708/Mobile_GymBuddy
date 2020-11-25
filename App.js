@@ -4,18 +4,33 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 // Import Navigators from React Navigation
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, TabActions } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 // Import Screens
 import SplashScreen from "./Screen/SplashScreen";
 import LoginScreen from "./Screen/LoginScreen";
 import RegisterScreen from "./Screen/RegisterScreen";
 import DrawerNavigationRoutes from "./Screen/DrawerNavigationRoutes";
+
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 import { createStore } from "redux";
-import rootReducer from "./reducers";
-import Reactotron from './ReactotronConfig'
+//import rootReducer from "./reducers";
+import getStore from "./src/store/index";
+
+import {
+  Ionicons,
+  AntDesign,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import { Statistics } from "./src/page/Statistics";
+import HomePageStackScreen from "./src/page/Home";
+import { Calendar } from "./src/page/Calendar";
+import CalendarPageStackScreen from "./src/page/CalendarPage";
+import WorkoutScreen from "./Screen/DrawerScreens/WorkoutScreen";
+import Reactotron from "./ReactotronConfig";
 
 const Stack = createStackNavigator();
 const initialState = {
@@ -27,7 +42,9 @@ const initialState = {
     },
   ],
 };
-const store = createStore(rootReducer, initialState, Reactotron.createEnhancer());
+//const store = createStore(rootReducer, initialState, Reactotron.createEnhancer());
+
+let { store, persistor } = getStore(Reactotron.createEnhancer());
 if (__DEV__) {
   import("./ReactotronConfig").then(() => console.log("Reactotron Configured"));
 }
@@ -63,30 +80,37 @@ const Auth = () => {
 const App = () => {
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="SplashScreen">
-          {/* SplashScreen which will come once for 5 Seconds */}
-          <Stack.Screen
-            name="SplashScreen"
-            component={SplashScreen}
-            // Hiding header for Splash Screen
-            options={{ headerShown: false }}
-          />
-          {/* Auth Navigator which includer Login Signup will come once */}
-          <Stack.Screen
-            name="Auth"
-            component={Auth}
-            options={{ headerShown: false }}
-          />
-          {/* Navigation Drawer as a landing page */}
-          <Stack.Screen
-            name="DrawerNavigationRoutes"
-            component={DrawerNavigationRoutes}
-            // Hiding header for Navigation Drawer as we will use our custom header
-            options={{ headerShown: false }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="SplashScreen">
+            {/* SplashScreen which will come once for 5 Seconds */}
+            <Stack.Screen
+              name="SplashScreen"
+              component={SplashScreen}
+              // Hiding header for Splash Screen
+              options={{ headerShown: false }}
+            />
+            {/* Auth Navigator which includer Login Signup will come once */}
+            <Stack.Screen
+              name="Auth"
+              component={Auth}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="WorkoutScreen"
+              component={WorkoutScreen}
+              options={{ headerShown: false }}
+            />
+            {/* Navigation Drawer as a landing page */}
+            <Stack.Screen
+              name="DrawerNavigationRoutes"
+              component={DrawerNavigationRoutes}
+              // Hiding header for Navigation Drawer as we will use our custom header
+              options={{ headerShown: false }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PersistGate>
     </Provider>
   );
 };
